@@ -14,35 +14,45 @@ export function NeuralBackground() {
     canvas.height = window.innerHeight;
 
     const nodes: { x: number; y: number; vx: number; vy: number }[] = [];
-    const nodeCount = 50;
+    const nodeCount = 100; // Increased node count for denser network
 
+    // Create nodes
     for (let i = 0; i < nodeCount; i++) {
       nodes.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
       });
     }
 
     function drawNode(x: number, y: number) {
+      if (!ctx) return;
       ctx.beginPath();
       ctx.arc(x, y, 2, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(100, 149, 237, 0.8)';
+      // Bright blue color matching the image
+      ctx.fillStyle = 'rgba(100, 200, 255, 0.8)';
       ctx.fill();
     }
 
     function drawConnection(x1: number, y1: number, x2: number, y2: number, distance: number) {
+      if (!ctx) return;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
-      ctx.strokeStyle = `rgba(100, 149, 237, ${1 - distance / 100})`;
+      // Purple gradient for connections
+      const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+      gradient.addColorStop(0, `rgba(147, 112, 219, ${0.8 - distance / 150})`);
+      gradient.addColorStop(1, `rgba(100, 200, 255, ${0.8 - distance / 150})`);
+      ctx.strokeStyle = gradient;
       ctx.lineWidth = 0.5;
       ctx.stroke();
     }
 
     function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!ctx || !canvas) return;
+      ctx.fillStyle = 'rgba(0, 0, 20, 0.2)'; // Dark blue background with slight transparency
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       nodes.forEach((node) => {
         node.x += node.vx;
@@ -60,7 +70,7 @@ export function NeuralBackground() {
           const dy = node2.y - node1.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 100) {
+          if (distance < 150) { // Increased connection distance
             drawConnection(node1.x, node1.y, node2.x, node2.y, distance);
           }
         });
@@ -83,7 +93,7 @@ export function NeuralBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 bg-background"
+      className="fixed inset-0 -z-10 bg-[#000014]" // Dark blue background base
     />
   );
 }

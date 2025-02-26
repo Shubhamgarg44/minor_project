@@ -8,11 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
-type AssessmentStep = "problem" | "prediction" | "solution";
+type AssessmentStep = "none" | "problem" | "prediction" | "solution";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
-  const [currentStep, setCurrentStep] = useState<AssessmentStep>("problem");
+  const [currentStep, setCurrentStep] = useState<AssessmentStep>("none");
   const [problem, setProblem] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -33,98 +33,105 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen flex flex-col">
       <NeuralBackground />
-      
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-primary">
-          Welcome, {user?.username}
-        </h1>
-        <Button variant="outline" onClick={() => logoutMutation.mutate()}>
-          Logout
-        </Button>
+
+      <header className="p-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-primary">
+            Welcome, {user?.username}
+          </h1>
+          <Button variant="outline" onClick={() => logoutMutation.mutate()}>
+            Logout
+          </Button>
+        </div>
       </header>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <AssessmentBox
-          type="problem"
-          title="Describe Problem"
-          description="Detail the security concern or vulnerability you've identified"
-          onClick={() => setCurrentStep("problem")}
-          isActive={currentStep === "problem"}
-        />
-        <AssessmentBox
-          type="prediction"
-          title="AI Prediction"
-          description="Get AI-powered analysis and risk assessment"
-          onClick={() => setCurrentStep("prediction")}
-          isActive={currentStep === "prediction"}
-        />
-        <AssessmentBox
-          type="solution"
-          title="Solutions"
-          description="Receive detailed mitigation strategies and recommendations"
-          onClick={() => setCurrentStep("solution")}
-          isActive={currentStep === "solution"}
-        />
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto space-y-4"
-      >
-        {currentStep === "problem" && (
-          <>
-            <Textarea
-              placeholder="Describe the security vulnerability or concern..."
-              className="min-h-[200px]"
-              value={problem}
-              onChange={(e) => setProblem(e.target.value)}
-            />
-            <Button 
-              onClick={handleAnalyze}
-              disabled={!problem || isAnalyzing}
-              className="w-full"
+      <div className="flex-grow flex flex-col justify-end p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto w-full space-y-8"
+        >
+          {currentStep === "problem" && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="space-y-4"
             >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                "Analyze Vulnerability"
-              )}
-            </Button>
-          </>
-        )}
-
-        {(currentStep === "prediction" || currentStep === "solution") && result && (
-          <>
-            <Alert>
-              <AlertDescription className="whitespace-pre-line">
-                {result}
-              </AlertDescription>
-            </Alert>
-            {currentStep === "prediction" && (
+              <Textarea
+                placeholder="Describe the security vulnerability or concern..."
+                className="min-h-[200px] bg-background/80 backdrop-blur"
+                value={problem}
+                onChange={(e) => setProblem(e.target.value)}
+              />
               <Button 
                 onClick={handleAnalyze}
-                disabled={isAnalyzing}
+                disabled={!problem || isAnalyzing}
                 className="w-full"
               >
                 {isAnalyzing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Solutions...
+                    Analyzing...
                   </>
                 ) : (
-                  "Get Solutions"
+                  "Analyze Vulnerability"
                 )}
               </Button>
-            )}
-          </>
-        )}
-      </motion.div>
+            </motion.div>
+          )}
+
+          {(currentStep === "prediction" || currentStep === "solution") && result && (
+            <Alert className="bg-background/80 backdrop-blur">
+              <AlertDescription className="whitespace-pre-line">
+                {result}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {currentStep === "prediction" && (
+            <Button 
+              onClick={handleAnalyze}
+              disabled={isAnalyzing}
+              className="w-full"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating Solutions...
+                </>
+              ) : (
+                "Get Solutions"
+              )}
+            </Button>
+          )}
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <AssessmentBox
+              type="problem"
+              title="Describe Problem"
+              description="Detail the security concern or vulnerability you've identified"
+              onClick={() => setCurrentStep(currentStep === "problem" ? "none" : "problem")}
+              isActive={currentStep === "problem"}
+            />
+            <AssessmentBox
+              type="prediction"
+              title="AI Prediction"
+              description="Get AI-powered analysis and risk assessment"
+              onClick={() => {}}
+              isActive={currentStep === "prediction"}
+            />
+            <AssessmentBox
+              type="solution"
+              title="Solutions"
+              description="Receive detailed mitigation strategies and recommendations"
+              onClick={() => {}}
+              isActive={currentStep === "solution"}
+            />
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }
