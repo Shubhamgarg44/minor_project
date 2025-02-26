@@ -15,18 +15,17 @@ export function NeuralBackground() {
 
     // Brain shape parameters
     const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2.5; // Position brain slightly above center
+    const centerY = canvas.height / 2.5;
     const brainRadius = 150;
 
     const nodes: { x: number; y: number; vx: number; vy: number }[] = [];
-    const nodeCount = 150; // More nodes for denser network
+    const nodeCount = 150;
 
     // Create nodes with more concentration around brain shape
     for (let i = 0; i < nodeCount; i++) {
       const angle = Math.random() * Math.PI * 2;
       const radius = Math.random() * brainRadius * 2;
 
-      // 70% of nodes around brain shape, 30% scattered
       const x = Math.random() > 0.3 
         ? centerX + Math.cos(angle) * radius
         : Math.random() * canvas.width;
@@ -44,75 +43,78 @@ export function NeuralBackground() {
 
     function drawNode(x: number, y: number, isCenter: boolean = false) {
       if (!ctx) return;
+
+      // Add glow effect
+      ctx.shadowColor = isCenter 
+        ? 'rgba(147, 112, 219, 0.8)'
+        : 'rgba(100, 200, 255, 0.6)';
+      ctx.shadowBlur = isCenter ? 20 : 10;
+
       ctx.beginPath();
       ctx.arc(x, y, isCenter ? 3 : 2, 0, Math.PI * 2);
       ctx.fillStyle = isCenter 
-        ? 'rgba(147, 112, 219, 0.9)' // Brighter purple for center nodes
-        : 'rgba(100, 200, 255, 0.8)'; // Bright blue for other nodes
+        ? 'rgba(180, 130, 255, 0.9)' // Brighter purple for center nodes
+        : 'rgba(130, 210, 255, 0.8)'; // Brighter blue for other nodes
       ctx.fill();
 
-      // Add glow effect
-      if (isCenter) {
-        ctx.shadowColor = 'rgba(147, 112, 219, 0.6)';
-        ctx.shadowBlur = 15;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
+      ctx.shadowBlur = 0;
     }
 
     function drawConnection(x1: number, y1: number, x2: number, y2: number, distance: number) {
       if (!ctx) return;
+
+      // Add glow effect
+      ctx.shadowColor = 'rgba(147, 112, 219, 0.4)';
+      ctx.shadowBlur = 8;
+
       const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
-      gradient.addColorStop(0, `rgba(147, 112, 219, ${0.8 - distance / 200})`);
-      gradient.addColorStop(1, `rgba(100, 200, 255, ${0.8 - distance / 200})`);
+      gradient.addColorStop(0, `rgba(180, 130, 255, ${1 - distance / 200})`);
+      gradient.addColorStop(1, `rgba(130, 210, 255, ${1 - distance / 200})`);
 
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
       ctx.strokeStyle = gradient;
-      ctx.lineWidth = 0.5;
-
-      // Add glow effect to connections
-      ctx.shadowColor = 'rgba(147, 112, 219, 0.3)';
-      ctx.shadowBlur = 5;
+      ctx.lineWidth = 0.8;
       ctx.stroke();
+
       ctx.shadowBlur = 0;
     }
 
     function drawBrainOutline() {
       if (!ctx) return;
+
+      // Outer glow
+      ctx.shadowColor = 'rgba(147, 112, 219, 0.6)';
+      ctx.shadowBlur = 40;
+
       ctx.beginPath();
       ctx.ellipse(centerX, centerY, brainRadius, brainRadius * 1.2, 0, 0, Math.PI * 2);
 
-      // Create gradient for brain outline
       const gradient = ctx.createRadialGradient(
         centerX, centerY, 0,
-        centerX, centerY, brainRadius * 1.5
+        centerX, centerY, brainRadius * 2
       );
-      gradient.addColorStop(0, 'rgba(100, 200, 255, 0.2)');
-      gradient.addColorStop(0.5, 'rgba(147, 112, 219, 0.15)');
-      gradient.addColorStop(1, 'rgba(147, 112, 219, 0)');
+      gradient.addColorStop(0, 'rgba(130, 210, 255, 0.3)');
+      gradient.addColorStop(0.5, 'rgba(180, 130, 255, 0.2)');
+      gradient.addColorStop(1, 'rgba(180, 130, 255, 0)');
 
       ctx.fillStyle = gradient;
-      ctx.shadowColor = 'rgba(100, 200, 255, 0.5)';
-      ctx.shadowBlur = 30;
       ctx.fill();
+
       ctx.shadowBlur = 0;
     }
 
     function animate() {
       if (!ctx || !canvas) return;
 
-      // Dark blue background with slight fade effect
-      ctx.fillStyle = 'rgba(0, 0, 20, 0.2)';
+      // Very dark blue background with stronger fade
+      ctx.fillStyle = 'rgba(0, 0, 25, 0.3)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw brain outline first
       drawBrainOutline();
 
-      // Update and draw nodes
       nodes.forEach((node) => {
-        // Add slight attraction to center for brain shape
         const dx = centerX - node.x;
         const dy = centerY - node.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
@@ -125,7 +127,6 @@ export function NeuralBackground() {
         node.x += node.vx;
         node.y += node.vy;
 
-        // Bounce off edges
         if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
         if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
 
@@ -133,14 +134,13 @@ export function NeuralBackground() {
         drawNode(node.x, node.y, isCenter);
       });
 
-      // Draw connections
       nodes.forEach((node1, i) => {
         nodes.slice(i + 1).forEach((node2) => {
           const dx = node2.x - node1.x;
           const dy = node2.y - node1.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 150 && // Shorter connection distance for denser network
+          if (distance < 150 && 
               (Math.sqrt(Math.pow(node1.x - centerX, 2) + Math.pow(node1.y - centerY, 2)) < brainRadius * 1.5 ||
                Math.sqrt(Math.pow(node2.x - centerX, 2) + Math.pow(node2.y - centerY, 2)) < brainRadius * 1.5)) {
             drawConnection(node1.x, node1.y, node2.x, node2.y, distance);
@@ -165,7 +165,7 @@ export function NeuralBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 bg-[#000014]"
+      className="fixed inset-0 -z-10 bg-[#000019]"
     />
   );
 }
