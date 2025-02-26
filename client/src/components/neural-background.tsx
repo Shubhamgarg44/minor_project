@@ -43,6 +43,7 @@ export function NeuralBackground() {
     }
 
     function drawNode(x: number, y: number, isCenter: boolean = false) {
+      if (!ctx) return;
       ctx.beginPath();
       ctx.arc(x, y, isCenter ? 3 : 2, 0, Math.PI * 2);
       ctx.fillStyle = isCenter 
@@ -60,6 +61,7 @@ export function NeuralBackground() {
     }
 
     function drawConnection(x1: number, y1: number, x2: number, y2: number, distance: number) {
+      if (!ctx) return;
       const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
       gradient.addColorStop(0, `rgba(147, 112, 219, ${0.8 - distance / 200})`);
       gradient.addColorStop(1, `rgba(100, 200, 255, ${0.8 - distance / 200})`);
@@ -77,12 +79,36 @@ export function NeuralBackground() {
       ctx.shadowBlur = 0;
     }
 
+    function drawBrainOutline() {
+      if (!ctx) return;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, brainRadius, brainRadius * 1.2, 0, 0, Math.PI * 2);
+
+      // Create gradient for brain outline
+      const gradient = ctx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, brainRadius * 1.5
+      );
+      gradient.addColorStop(0, 'rgba(100, 200, 255, 0.2)');
+      gradient.addColorStop(0.5, 'rgba(147, 112, 219, 0.15)');
+      gradient.addColorStop(1, 'rgba(147, 112, 219, 0)');
+
+      ctx.fillStyle = gradient;
+      ctx.shadowColor = 'rgba(100, 200, 255, 0.5)';
+      ctx.shadowBlur = 30;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
     function animate() {
       if (!ctx || !canvas) return;
 
       // Dark blue background with slight fade effect
       ctx.fillStyle = 'rgba(0, 0, 20, 0.2)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw brain outline first
+      drawBrainOutline();
 
       // Update and draw nodes
       nodes.forEach((node) => {
@@ -114,7 +140,9 @@ export function NeuralBackground() {
           const dy = node2.y - node1.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 200) { // Longer connection distance
+          if (distance < 150 && // Shorter connection distance for denser network
+              (Math.sqrt(Math.pow(node1.x - centerX, 2) + Math.pow(node1.y - centerY, 2)) < brainRadius * 1.5 ||
+               Math.sqrt(Math.pow(node2.x - centerX, 2) + Math.pow(node2.y - centerY, 2)) < brainRadius * 1.5)) {
             drawConnection(node1.x, node1.y, node2.x, node2.y, distance);
           }
         });
