@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import { NeuralLoader } from "@/components/neural-loader";
 
 type AssessmentStep = "none" | "problem" | "prediction" | "solution";
 
@@ -61,26 +62,27 @@ export default function HomePage() {
               animate={{ opacity: 1, height: "auto" }}
               className="space-y-4"
             >
-              <Textarea
-                placeholder="Describe the security vulnerability or concern..."
-                className="min-h-[200px] bg-background/80 backdrop-blur"
-                value={problem}
-                onChange={(e) => setProblem(e.target.value)}
-              />
-              <Button 
-                onClick={handleAnalyze}
-                disabled={!problem || isAnalyzing}
-                className="w-full"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  "Analyze Vulnerability"
-                )}
-              </Button>
+              {isAnalyzing ? (
+                <div className="min-h-[200px] flex items-center justify-center">
+                  <NeuralLoader message="Analyzing vulnerability patterns..." />
+                </div>
+              ) : (
+                <>
+                  <Textarea
+                    placeholder="Describe the security vulnerability or concern..."
+                    className="min-h-[200px] bg-background/80 backdrop-blur"
+                    value={problem}
+                    onChange={(e) => setProblem(e.target.value)}
+                  />
+                  <Button 
+                    onClick={handleAnalyze}
+                    disabled={!problem || isAnalyzing}
+                    className="w-full"
+                  >
+                    Analyze Vulnerability
+                  </Button>
+                </>
+              )}
             </motion.div>
           )}
 
@@ -101,10 +103,9 @@ export default function HomePage() {
               className="w-full"
             >
               {isAnalyzing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating Solutions...
-                </>
+                <div className="w-full flex items-center justify-center">
+                  <NeuralLoader message="Generating AI-powered solutions..." />
+                </div>
               ) : (
                 "Get Solutions"
               )}
