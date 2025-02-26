@@ -47,12 +47,14 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="flex-grow flex flex-col justify-end p-6">
+      {/* Main content area with flex-grow to push boxes to bottom */}
+      <div className="flex-grow flex flex-col justify-end pb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto w-full space-y-8"
+          className="max-w-4xl mx-auto w-full space-y-8 px-6"
         >
+          {/* Only show textarea and analyze button when problem box is clicked */}
           {currentStep === "problem" && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -82,6 +84,7 @@ export default function HomePage() {
             </motion.div>
           )}
 
+          {/* Show analysis results */}
           {(currentStep === "prediction" || currentStep === "solution") && result && (
             <Alert className="bg-background/80 backdrop-blur">
               <AlertDescription className="whitespace-pre-line">
@@ -90,6 +93,7 @@ export default function HomePage() {
             </Alert>
           )}
 
+          {/* Get solutions button */}
           {currentStep === "prediction" && (
             <Button 
               onClick={handleAnalyze}
@@ -107,6 +111,7 @@ export default function HomePage() {
             </Button>
           )}
 
+          {/* Three boxes at the bottom */}
           <div className="grid md:grid-cols-3 gap-6">
             <AssessmentBox
               type="problem"
